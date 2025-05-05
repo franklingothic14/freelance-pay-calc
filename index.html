@@ -101,11 +101,11 @@
   <label data-en="Hourly Rate" data-uk="Погодинна ставка">Hourly Rate</label>
   <input type="number" id="rate" placeholder="25" />
 
-  <label data-en="Hours per Week" data-uk="Годин на тиждень">Hours per Week</label>
-  <input type="number" id="hours" placeholder="30" />
+  <label data-en="Days per Week" data-uk="Днів на тиждень">Days per Week</label>
+  <input type="number" id="days" placeholder="5" />
 
-  <label data-en="Weeks per Month" data-uk="Тижнів у місяці">Weeks per Month</label>
-  <input type="number" id="weeks" placeholder="4" />
+  <label data-en="Hours per Day" data-uk="Годин на день">Hours per Day</label>
+  <input type="number" id="hoursPerDay" placeholder="6" />
 
   <label data-en="Tax (%)" data-uk="Податок (%)">Tax (%)</label>
   <input type="number" id="tax" placeholder="5" />
@@ -137,12 +137,14 @@
 
     function calculate() {
       const rate = +document.getElementById('rate').value || 0;
-      const hours = +document.getElementById('hours').value || 0;
-      const weeks = +document.getElementById('weeks').value || 0;
+      const days = +document.getElementById('days').value || 0;
+      const hoursPerDay = +document.getElementById('hoursPerDay').value || 0;
       const tax = +document.getElementById('tax').value || 0;
       const fee = +document.getElementById('fee').value || 0;
 
-      const gross = rate * hours * weeks;
+      const weeklyHours = days * hoursPerDay;
+      const monthlyHours = weeklyHours * 4;
+      const gross = rate * monthlyHours;
       const feeAmount = gross * (fee / 100);
       const taxAmount = (gross - feeAmount) * (tax / 100);
       const net = gross - feeAmount - taxAmount;
@@ -163,7 +165,15 @@
       `;
     }
 
-    setLang(lang);
+    // Restore user settings from localStorage if desired
+    window.onload = () => {
+      lang = localStorage.getItem('lang') || 'en';
+      currency = localStorage.getItem('currency') || 'USD';
+      document.getElementById('langSelect').value = lang;
+      document.getElementById('currencySelect').value = currency;
+      setLang(lang);
+      setCurrency(currency);
+    };
   </script>
 </body>
 </html>
