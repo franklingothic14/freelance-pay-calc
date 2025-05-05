@@ -1,199 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Freelance Salary Calculator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Freelance Calculator</title>
   <style>
-    :root {
-      --bg-color: #ffffff;
-      --text-color: #000000;
-      --card-bg: #f0f0f0;
-    }
-
-    .dark-theme {
-      --bg-color: #1e1e1e;
-      --text-color: #f5f5f5;
-      --card-bg: #2a2a2a;
-    }
-
     body {
-      font-family: Helvetica, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      max-width: 700px;
-      margin: 40px auto;
-      padding: 0 10px;
-      transition: background-color 0.3s, color 0.3s;
+      margin: 0;
+      padding: 20px;
+      background-color: #000;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
     }
 
-    input, select {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 8px;
-      background-color: var(--card-bg);
-      color: var(--text-color);
-      border: 1px solid #888;
+    h1 {
+      text-align: center;
+      font-size: 1.8em;
+      margin-bottom: 20px;
     }
 
     label {
-      font-weight: bold;
       display: block;
-      margin-top: 10px;
+      margin: 10px 0 5px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      background: #000;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      font-family: 'Courier New', monospace;
+      font-size: 1em;
+      margin-bottom: 15px;
+    }
+
+    button {
+      font-weight: bold;
+      cursor: pointer;
     }
 
     .result {
       margin-top: 20px;
-      padding: 15px;
-      background: var(--card-bg);
-      border-radius: 8px;
+      border-top: 1px solid #00ff00;
+      padding-top: 10px;
+      font-size: 1.1em;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 15px;
-    }
-
-    th, td {
-      padding: 8px;
-      border-bottom: 1px solid #ccc;
-      text-align: center;
-    }
-
-    button {
-      padding: 10px 20px;
-      margin: 10px 5px;
-      font-weight: bold;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      background-color: #007BFF;
-      color: white;
-    }
-
-    .top-controls {
+    .flex {
       display: flex;
       gap: 10px;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
     }
 
-    .lang-select, .currency-select {
+    .flex > * {
       flex: 1;
-      min-width: 120px;
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.4em;
+      }
+
+      input, select, button {
+        font-size: 1em;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="top-controls">
-    <button onclick="toggleTheme()">🌗 <span data-en="Toggle Theme" data-uk="Змінити тему">Toggle Theme</span></button>
+  <h1 data-en="Freelance Calculator" data-uk="Калькулятор Фрілансера">Freelance Calculator</h1>
 
-    <select class="lang-select" onchange="setLang(this.value)">
-      <option value="en">🇺🇸 English</option>
-      <option value="uk">🇺🇦 Українська</option>
+  <div class="flex">
+    <select id="langSelect" onchange="setLang(this.value)">
+      <option value="en">🇺🇸 EN</option>
+      <option value="uk">🇺🇦 УКР</option>
     </select>
-
-    <select class="currency-select" onchange="setCurrency(this.value)">
-      <option value="USD">USD ($)</option>
-      <option value="UAH">UAH (₴)</option>
+    <select id="currencySelect" onchange="setCurrency(this.value)">
+      <option value="USD">USD</option>
+      <option value="UAH">UAH</option>
     </select>
   </div>
 
-  <h2 data-en="Freelance Salary Calculator" data-uk="Калькулятор Зарплати Фрілансера">Freelance Salary Calculator</h2>
-
   <label data-en="Hourly Rate" data-uk="Погодинна ставка">Hourly Rate</label>
-  <input type="number" id="rate" placeholder="e.g. 25">
+  <input type="number" id="rate" placeholder="25" />
 
-  <label data-en="Working Weeks per Month" data-uk="Кількість тижнів на місяць">Working Weeks per Month</label>
-  <input type="number" id="weeksPerMonth" placeholder="e.g. 4">
+  <label data-en="Hours per Week" data-uk="Годин на тиждень">Hours per Week</label>
+  <input type="number" id="hours" placeholder="30" />
+
+  <label data-en="Weeks per Month" data-uk="Тижнів у місяці">Weeks per Month</label>
+  <input type="number" id="weeks" placeholder="4" />
 
   <label data-en="Tax (%)" data-uk="Податок (%)">Tax (%)</label>
-  <input type="number" id="tax" placeholder="e.g. 5">
+  <input type="number" id="tax" placeholder="5" />
 
   <label data-en="Platform Fee (%)" data-uk="Комісія платформи (%)">Platform Fee (%)</label>
-  <input type="number" id="fee" placeholder="e.g. 10">
-
-  <label data-en="Hours per Day" data-uk="Години по днях">Hours per Day</label>
-  <table>
-    <thead>
-      <tr>
-        <th data-en="Day" data-uk="День">Day</th>
-        <th data-en="Hours" data-uk="Години">Hours</th>
-      </tr>
-    </thead>
-    <tbody id="hoursTable">
-      <tr><td data-en="Monday" data-uk="Понеділок">Monday</td><td><input type="number" id="mon"></td></tr>
-      <tr><td data-en="Tuesday" data-uk="Вівторок">Tuesday</td><td><input type="number" id="tue"></td></tr>
-      <tr><td data-en="Wednesday" data-uk="Середа">Wednesday</td><td><input type="number" id="wed"></td></tr>
-      <tr><td data-en="Thursday" data-uk="Четвер">Thursday</td><td><input type="number" id="thu"></td></tr>
-      <tr><td data-en="Friday" data-uk="П’ятниця">Friday</td><td><input type="number" id="fri"></td></tr>
-      <tr><td data-en="Saturday" data-uk="Субота">Saturday</td><td><input type="number" id="sat"></td></tr>
-      <tr><td data-en="Sunday" data-uk="Неділя">Sunday</td><td><input type="number" id="sun"></td></tr>
-    </tbody>
-  </table>
+  <input type="number" id="fee" placeholder="10" />
 
   <button onclick="calculate()" data-en="Calculate" data-uk="Розрахувати">Calculate</button>
 
   <div class="result" id="result"></div>
 
   <script>
-    let currentLang = 'en';
-    let currentCurrency = 'USD';
-    const exchangeRate = 39; // UAH per 1 USD
+    let lang = 'en';
+    let currency = 'USD';
+    const exchangeRate = 39; // USD → UAH
 
-    function translate() {
+    function setLang(l) {
+      lang = l;
       document.querySelectorAll('[data-en]').forEach(el => {
-        el.innerText = el.dataset[currentLang];
+        el.innerText = el.dataset[lang];
       });
-    }
-
-    function setLang(lang) {
-      currentLang = lang;
-      translate();
-    }
-
-    function setCurrency(curr) {
-      currentCurrency = curr;
       calculate();
     }
 
-    function toggleTheme() {
-      document.body.classList.toggle('dark-theme');
+    function setCurrency(c) {
+      currency = c;
+      calculate();
     }
 
     function calculate() {
-      const rate = parseFloat(document.getElementById("rate").value) || 0;
-      const weeks = parseFloat(document.getElementById("weeksPerMonth").value) || 0;
-      const tax = parseFloat(document.getElementById("tax").value) || 0;
-      const fee = parseFloat(document.getElementById("fee").value) || 0;
+      const rate = +document.getElementById('rate').value || 0;
+      const hours = +document.getElementById('hours').value || 0;
+      const weeks = +document.getElementById('weeks').value || 0;
+      const tax = +document.getElementById('tax').value || 0;
+      const fee = +document.getElementById('fee').value || 0;
 
-      const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
-      let weeklyHours = 0;
-      days.forEach(day => {
-        weeklyHours += parseFloat(document.getElementById(day).value) || 0;
-      });
+      const gross = rate * hours * weeks;
+      const feeAmount = gross * (fee / 100);
+      const taxAmount = (gross - feeAmount) * (tax / 100);
+      const net = gross - feeAmount - taxAmount;
+      const yearly = net * 12;
 
-      let monthlyHours = weeklyHours * weeks;
-      let grossMonthly = monthlyHours * rate;
-      let feeAmount = grossMonthly * (fee / 100);
-      let taxAmount = (grossMonthly - feeAmount) * (tax / 100);
-      let netMonthly = grossMonthly - feeAmount - taxAmount;
-      let netYearly = netMonthly * 12;
+      const symbol = currency === 'UAH' ? '₴' : '$';
+      const multiplier = currency === 'UAH' ? exchangeRate : 1;
 
-      const currencySymbol = currentCurrency === 'UAH' ? '₴' : '$';
-      const multiplier = currentCurrency === 'UAH' ? exchangeRate : 1;
+      const t = {
+        en: ['Gross Monthly', 'Net Monthly', 'Net Yearly'],
+        uk: ['Брутто в місяць', 'Нетто в місяць', 'Нетто в рік']
+      };
 
-      document.getElementById("result").innerHTML = `
-        <strong data-en="Gross Monthly" data-uk="Брутто в місяць">Gross Monthly</strong>: ${currencySymbol}${(grossMonthly * multiplier).toFixed(2)}<br>
-        <strong data-en="Net Monthly" data-uk="Нетто в місяць">Net Monthly</strong>: ${currencySymbol}${(netMonthly * multiplier).toFixed(2)}<br>
-        <strong data-en="Net Yearly" data-uk="Нетто в рік">Net Yearly</strong>: ${currencySymbol}${(netYearly * multiplier).toFixed(2)}
+      document.getElementById('result').innerHTML = `
+        <div>${t[lang][0]}: ${symbol}${(gross * multiplier).toFixed(2)}</div>
+        <div>${t[lang][1]}: ${symbol}${(net * multiplier).toFixed(2)}</div>
+        <div>${t[lang][2]}: ${symbol}${(yearly * multiplier).toFixed(2)}</div>
       `;
-      translate();
     }
 
-    translate();
+    setLang(lang);
   </script>
 </body>
 </html>
