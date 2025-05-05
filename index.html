@@ -1,61 +1,199 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Калькулятор ЗП Фрилансера</title>
+  <title>Freelance Salary Calculator</title>
   <style>
-    body { font-family: sans-serif; max-width: 500px; margin: 40px auto; }
-    input { width: 100%; margin-bottom: 10px; padding: 8px; }
-    label { font-weight: bold; }
-    .result { margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 8px; }
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --card-bg: #f0f0f0;
+    }
+
+    .dark-theme {
+      --bg-color: #1e1e1e;
+      --text-color: #f5f5f5;
+      --card-bg: #2a2a2a;
+    }
+
+    body {
+      font-family: Helvetica, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 0 10px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    input, select {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid #888;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: var(--card-bg);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+    }
+
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #ccc;
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #007BFF;
+      color: white;
+    }
+
+    .top-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .lang-select, .currency-select {
+      flex: 1;
+      min-width: 120px;
+    }
   </style>
 </head>
 <body>
-  <h2>Калькулятор ЗП Фрилансера</h2>
-  <label>Погодинна ставка (грн):</label>
-  <input type="number" id="rate" placeholder="Наприклад: 400">
+  <div class="top-controls">
+    <button onclick="toggleTheme()">🌗 <span data-en="Toggle Theme" data-uk="Змінити тему">Toggle Theme</span></button>
 
-  <label>Годин на день:</label>
-  <input type="number" id="hoursPerDay" placeholder="Наприклад: 6">
+    <select class="lang-select" onchange="setLang(this.value)">
+      <option value="en">🇺🇸 English</option>
+      <option value="uk">🇺🇦 Українська</option>
+    </select>
 
-  <label>Робочих днів на тиждень:</label>
-  <input type="number" id="daysPerWeek" placeholder="Наприклад: 5">
+    <select class="currency-select" onchange="setCurrency(this.value)">
+      <option value="USD">USD ($)</option>
+      <option value="UAH">UAH (₴)</option>
+    </select>
+  </div>
 
-  <label>Робочих тижнів на місяць:</label>
-  <input type="number" id="weeksPerMonth" placeholder="Наприклад: 4">
+  <h2 data-en="Freelance Salary Calculator" data-uk="Калькулятор Зарплати Фрілансера">Freelance Salary Calculator</h2>
 
-  <label>Податок (%):</label>
-  <input type="number" id="tax" placeholder="Наприклад: 5">
+  <label data-en="Hourly Rate" data-uk="Погодинна ставка">Hourly Rate</label>
+  <input type="number" id="rate" placeholder="e.g. 25">
 
-  <label>Комісія платформи (%):</label>
-  <input type="number" id="fee" placeholder="Наприклад: 10">
+  <label data-en="Working Weeks per Month" data-uk="Кількість тижнів на місяць">Working Weeks per Month</label>
+  <input type="number" id="weeksPerMonth" placeholder="e.g. 4">
 
-  <button onclick="calculate()">Розрахувати</button>
+  <label data-en="Tax (%)" data-uk="Податок (%)">Tax (%)</label>
+  <input type="number" id="tax" placeholder="e.g. 5">
+
+  <label data-en="Platform Fee (%)" data-uk="Комісія платформи (%)">Platform Fee (%)</label>
+  <input type="number" id="fee" placeholder="e.g. 10">
+
+  <label data-en="Hours per Day" data-uk="Години по днях">Hours per Day</label>
+  <table>
+    <thead>
+      <tr>
+        <th data-en="Day" data-uk="День">Day</th>
+        <th data-en="Hours" data-uk="Години">Hours</th>
+      </tr>
+    </thead>
+    <tbody id="hoursTable">
+      <tr><td data-en="Monday" data-uk="Понеділок">Monday</td><td><input type="number" id="mon"></td></tr>
+      <tr><td data-en="Tuesday" data-uk="Вівторок">Tuesday</td><td><input type="number" id="tue"></td></tr>
+      <tr><td data-en="Wednesday" data-uk="Середа">Wednesday</td><td><input type="number" id="wed"></td></tr>
+      <tr><td data-en="Thursday" data-uk="Четвер">Thursday</td><td><input type="number" id="thu"></td></tr>
+      <tr><td data-en="Friday" data-uk="П’ятниця">Friday</td><td><input type="number" id="fri"></td></tr>
+      <tr><td data-en="Saturday" data-uk="Субота">Saturday</td><td><input type="number" id="sat"></td></tr>
+      <tr><td data-en="Sunday" data-uk="Неділя">Sunday</td><td><input type="number" id="sun"></td></tr>
+    </tbody>
+  </table>
+
+  <button onclick="calculate()" data-en="Calculate" data-uk="Розрахувати">Calculate</button>
 
   <div class="result" id="result"></div>
 
   <script>
+    let currentLang = 'en';
+    let currentCurrency = 'USD';
+    const exchangeRate = 39; // UAH per 1 USD
+
+    function translate() {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        el.innerText = el.dataset[currentLang];
+      });
+    }
+
+    function setLang(lang) {
+      currentLang = lang;
+      translate();
+    }
+
+    function setCurrency(curr) {
+      currentCurrency = curr;
+      calculate();
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark-theme');
+    }
+
     function calculate() {
       const rate = parseFloat(document.getElementById("rate").value) || 0;
-      const hoursPerDay = parseFloat(document.getElementById("hoursPerDay").value) || 0;
-      const daysPerWeek = parseFloat(document.getElementById("daysPerWeek").value) || 0;
-      const weeksPerMonth = parseFloat(document.getElementById("weeksPerMonth").value) || 0;
+      const weeks = parseFloat(document.getElementById("weeksPerMonth").value) || 0;
       const tax = parseFloat(document.getElementById("tax").value) || 0;
       const fee = parseFloat(document.getElementById("fee").value) || 0;
 
-      const monthlyHours = hoursPerDay * daysPerWeek * weeksPerMonth;
-      const grossMonthly = rate * monthlyHours;
-      const feeAmount = grossMonthly * (fee / 100);
-      const taxedAmount = (grossMonthly - feeAmount) * (tax / 100);
-      const netMonthly = grossMonthly - feeAmount - taxedAmount;
-      const netYearly = netMonthly * 12;
+      const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+      let weeklyHours = 0;
+      days.forEach(day => {
+        weeklyHours += parseFloat(document.getElementById(day).value) || 0;
+      });
+
+      let monthlyHours = weeklyHours * weeks;
+      let grossMonthly = monthlyHours * rate;
+      let feeAmount = grossMonthly * (fee / 100);
+      let taxAmount = (grossMonthly - feeAmount) * (tax / 100);
+      let netMonthly = grossMonthly - feeAmount - taxAmount;
+      let netYearly = netMonthly * 12;
+
+      const currencySymbol = currentCurrency === 'UAH' ? '₴' : '$';
+      const multiplier = currentCurrency === 'UAH' ? exchangeRate : 1;
 
       document.getElementById("result").innerHTML = `
-        <strong>Брутто (місяць):</strong> ${grossMonthly.toFixed(2)} грн<br>
-        <strong>Нетто (місяць):</strong> ${netMonthly.toFixed(2)} грн<br>
-        <strong>Нетто (рік):</strong> ${netYearly.toFixed(2)} грн
+        <strong data-en="Gross Monthly" data-uk="Брутто в місяць">Gross Monthly</strong>: ${currencySymbol}${(grossMonthly * multiplier).toFixed(2)}<br>
+        <strong data-en="Net Monthly" data-uk="Нетто в місяць">Net Monthly</strong>: ${currencySymbol}${(netMonthly * multiplier).toFixed(2)}<br>
+        <strong data-en="Net Yearly" data-uk="Нетто в рік">Net Yearly</strong>: ${currencySymbol}${(netYearly * multiplier).toFixed(2)}
       `;
+      translate();
     }
+
+    translate();
   </script>
 </body>
 </html>
