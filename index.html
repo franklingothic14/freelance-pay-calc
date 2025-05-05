@@ -62,4 +62,145 @@
       margin-top: 20px;
       border-top: 1px solid var(--border);
       padding-top: 16px;
-      font-size:
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+
+    .meme {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .meme img {
+      max-width: 100%;
+      border-radius: 10px;
+      max-height: 300px;
+    }
+
+    .flex {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .flex > * {
+      flex: 1;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      input, select, button {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1 data-en="Freelance Calculator" data-uk="Калькулятор Фрілансера">Freelance Calculator</h1>
+
+  <div class="flex">
+    <select id="langSelect" onchange="setLang(this.value)">
+      <option value="en">🇺🇸 EN</option>
+      <option value="uk">🇺🇦 УКР</option>
+    </select>
+    <select id="currencySelect" onchange="setCurrency(this.value)">
+      <option value="USD">USD</option>
+      <option value="UAH">UAH</option>
+    </select>
+  </div>
+
+  <label data-en="Hourly Rate" data-uk="Погодинна ставка">Hourly Rate</label>
+  <input type="number" id="rate" placeholder="25" />
+
+  <label data-en="Hours per Day" data-uk="Годин на день">Hours per Day</label>
+  <input type="number" id="hoursPerDay" placeholder="6" />
+
+  <label data-en="Tax (%)" data-uk="Податок (%)">Tax (%)</label>
+  <input type="number" id="tax" placeholder="5" />
+
+  <button onclick="calculate()" data-en="Calculate" data-uk="Розрахувати">Calculate</button>
+
+  <div class="result" id="result"></div>
+
+  <div class="meme" id="meme">
+    <img src="" alt="Meme from The Office" id="memeImg" style="display:none;">
+  </div>
+
+  <script>
+    let lang = 'en';
+    let currency = 'USD';
+    const exchangeRate = 39; // USD → UAH
+
+    function setLang(l) {
+      lang = l;
+      localStorage.setItem('lang', l);
+      document.querySelectorAll('[data-en]').forEach(el => {
+        el.innerText = el.dataset[lang];
+      });
+      calculate();
+    }
+
+    function setCurrency(c) {
+      currency = c;
+      localStorage.setItem('currency', c);
+      calculate();
+    }
+
+    function getMemeImage(rate) {
+      if (rate < 5) {
+        return 'https://media.giphy.com/media/8nM6YNtvjuezzD7DNh/giphy.gif'; // very sad
+      } else if (rate < 10) {
+        return 'https://media.giphy.com/media/ei0E9JEqlOT54BI4fk/giphy.gif'; // sad
+      } else if (rate < 50) {
+        return 'https://media.giphy.com/media/rYxemTkIfp50lE6eJU/giphy.gif'; // hopeful
+      } else {
+        return 'https://media.giphy.com/media/ZF6cgZ0WE08IYtxU60/giphy.gif'; // winner
+      }
+    }
+
+    function calculate() {
+      const rate = +document.getElementById('rate').value || 0;
+      const hoursPerDay = +document.getElementById('hoursPerDay').value || 0;
+      const tax = +document.getElementById('tax').value || 0;
+
+      const days = 5;
+      const weeklyHours = days * hoursPerDay;
+      const monthlyHours = weeklyHours * 4;
+      const gross = rate * monthlyHours;
+      const taxAmount = gross * (tax / 100);
+      const net = gross - taxAmount;
+      const yearly = net * 12;
+
+      const symbol = currency === 'UAH' ? '₴' : '$';
+      const multiplier = currency === 'UAH' ? exchangeRate : 1;
+
+      const t = {
+        en: ['Gross Monthly', 'Net Monthly', 'Net Yearly'],
+        uk: ['Брутто в місяць', 'Нетто в місяць', 'Нетто в рік']
+      };
+
+      document.getElementById('result').innerHTML = `
+        <div>${t[lang][0]}: ${symbol}${(gross * multiplier).toFixed(2)}</div>
+        <div>${t[lang][1]}: ${symbol}${(net * multiplier).toFixed(2)}</div>
+        <div>${t[lang][2]}: ${symbol}${(yearly * multiplier).toFixed(2)}</div>
+      `;
+
+      const memeImg = document.getElementById('memeImg');
+      memeImg.src = getMemeImage(rate);
+      memeImg.style.display = 'block';
+    }
+
+    window.onload = () => {
+      lang = localStorage.getItem('lang') || 'en';
+      currency = localStorage.getItem('currency') || 'USD';
+      document.getElementById('langSelect').value = lang;
+      document.getElementById('currencySelect').value = currency;
+      setLang(lang);
+      setCurrency(currency);
+    };
+  </script>
+</body>
+</html>
